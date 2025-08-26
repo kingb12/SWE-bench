@@ -865,7 +865,7 @@ SPECS_PVLIB = {
         "python": "3.9",
         "install": "python -m pip install -e .[all]",
         "packages": "pandas scipy",
-        "pip_packages": ["jupyter", "ipython", "matplotlib", "pytest", "flake8"],
+        "pip_packages": ["jupyter", "ipython", "matplotlib", "pytest", "flake8",  "\"numpy<2.0\""],
         "test_cmd": TEST_PYTEST,
     }
     for k in ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"]

@@ -49,6 +49,10 @@ from swebench.harness.modal_eval import (
     run_instances_modal,
     validate_modal_credentials,
 )
+from swebench.harness.k8s_eval import (
+    run_instances_k8s,
+    validate_k8s_credentials,
+)
 from swebench.harness.test_spec.test_spec import make_test_spec, TestSpec
 from swebench.harness.utils import (
     EvaluationError,
@@ -454,6 +458,8 @@ def main(
     namespace: str | None,
     rewrite_reports: bool,
     modal: bool,
+    kubernetes: bool = False,
+    kubernetes_namespace: str = "default",
     instance_image_tag: str = "latest",
     report_dir: str = ".",
 ):
@@ -476,6 +482,12 @@ def main(
 
     if force_rebuild and namespace is not None:
         raise ValueError("Cannot force rebuild and use a namespace at the same time.")
+    
+    if kubernetes and force_rebuild:
+        raise ValueError("Cannot force rebuild when using Kubernetes mode - images must be pre-built and available on Docker Hub.")
+    
+    if modal and kubernetes:
+        raise ValueError("Cannot use both Modal and Kubernetes modes simultaneously.")
 
     # load predictions as map of instance_id to prediction
     predictions = get_predictions_from_file(predictions_path, dataset_name, split)
@@ -495,6 +507,24 @@ def main(
             validate_modal_credentials()
             run_instances_modal(predictions, dataset, full_dataset, run_id, timeout)
         return
+
+    if kubernetes:
+        # run instances on Kubernetes
+        if not dataset:
+            print("No instances to run.")
+        else:
+            validate_k8s_credentials()
+            run_instances_k8s(
+                predictions, 
+                dataset, 
+                full_dataset, 
+                run_id, 
+                timeout,
+                k8s_namespace=kubernetes_namespace,
+                max_workers=max_workers,
+                rewrite_reports=rewrite_reports
+            )
+        return make_run_report(predictions, full_dataset, run_id, client=None)
 
     # run instances locally
     if platform.system() == "Linux":
@@ -614,6 +644,10 @@ if __name__ == "__main__":
 
     # Modal execution args
     parser.add_argument("--modal", type=str2bool, default=False, help="Run on Modal")
+
+    # Kubernetes execution args
+    parser.add_argument("--kubernetes", type=str2bool, default=False, help="Run on Kubernetes")
+    parser.add_argument("--kubernetes_namespace", type=str, default="default", help="Kubernetes namespace to use")
 
     args = parser.parse_args()
     main(**vars(args))

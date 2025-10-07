@@ -481,7 +481,7 @@ def build_container(
             name=test_spec.get_instance_container_name(run_id),
             user=DOCKER_USER,
             detach=True,
-            command="tail -f /dev/null",
+            command="tail -f /dev/null",  # i.e. sleep infinity
             platform=test_spec.platform,
             cap_add=cap_add,
         )

@@ -863,7 +863,7 @@ SPECS_MARSHMALLOW = {
 SPECS_PVLIB = {
     k: {
         "python": "3.9",
-        "install": "python -m pip install -e .[all]",
+        "install": "python -m pip install -e .[all] && python -m pip install \"numpy<2.0\"",
         "packages": "pandas scipy",
         "pip_packages": ["jupyter", "ipython", "matplotlib", "pytest", "flake8",  "\"numpy<2.0\""],
         "test_cmd": TEST_PYTEST,

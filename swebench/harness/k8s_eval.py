@@ -105,8 +105,8 @@ def create_pod_spec(
                     working_dir=DOCKER_WORKDIR,
                     image_pull_policy="Always",  # Always pull to ensure latest
                     resources=client.V1ResourceRequirements(
-                        requests={"cpu": "2", "memory": "8Gi"},
-                        limits={"cpu": "2", "memory": "10Gi"},
+                        requests={"cpu": "1", "memory": "2Gi"},
+                        limits={"cpu": "1", "memory": "2Gi"},
                     ),
                 )
             ],

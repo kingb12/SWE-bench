@@ -6,6 +6,7 @@ instead of Docker containers.
 from __future__ import annotations
 
 import json
+import os
 import time
 import traceback
 from pathlib import Path
@@ -31,6 +32,17 @@ from swebench.harness.docker_build import setup_logger, close_logger
 from swebench.harness.grading import get_eval_report
 from swebench.harness.test_spec.test_spec import TestSpec
 from swebench.harness.utils import EvaluationError, run_threadpool
+
+AVOID_NODES: list[str] = [
+    "k8s-chase-ci-03.calit2.optiputer.net",
+    "k8s-chase-ci-02.calit2.optiputer.net",
+    "ry-gpu-15.sdsc.optiputer.net",
+    "rci-tide-cpu-02.sdsu.edu",
+    "gp-engine.hpc.okstate.edu",
+    "k8s-gpu-01.calit2.optiputer.net",
+    "dtn-gpu2.kreonet.net"
+    ]
+AVOID_NODES += [f"k8s-haosu-{i:02d}.sdsc.optiputer.net" for i in range(1, 40)]
 
 
 GIT_APPLY_CMDS = [
@@ -59,7 +71,7 @@ def create_pod_spec(
     instance_id: str,
     namespace: str,
     run_id: str,
-    naming_prefix: str = ""
+    naming_prefix: str = "bking2"
 ) -> client.V1Pod:
     """
     Create a Kubernetes pod specification for running a SWE-bench instance.
@@ -75,6 +87,7 @@ def create_pod_spec(
         V1Pod specification
     """
     app_name = "swebench"
+    naming_prefix = os.environ.get("SWEBENCH_POD_NAME_PREFIX", naming_prefix)
     if naming_prefix:
         app_name = naming_prefix + "-" + app_name
     pod_name = f"{app_name}-{instance_id.lower()}-{run_id}".replace('_', '-')
@@ -83,7 +96,23 @@ def create_pod_spec(
     # Use the instance image key as the image name
     # This assumes images are available on Docker Hub
     image_name = test_spec.instance_image_key
-    
+    node_affinity = None
+    if AVOID_NODES:
+        node_affinity = client.V1NodeAffinity(
+            required_during_scheduling_ignored_during_execution=client.V1NodeSelector(
+                node_selector_terms=[
+                    client.V1NodeSelectorTerm(
+                        match_expressions=[
+                            client.V1NodeSelectorRequirement(
+                                key="kubernetes.io/hostname",
+                                operator="NotIn",
+                                values=AVOID_NODES,
+                            )
+                        ]
+                    )
+                ]
+            )
+        )
     pod_spec = client.V1Pod(
         api_version="v1",
         kind="Pod",
@@ -110,6 +139,9 @@ def create_pod_spec(
                     ),
                 )
             ],
+            affinity=client.V1Affinity(
+                node_affinity=node_affinity
+            )
         )
     )
     

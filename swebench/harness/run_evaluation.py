@@ -462,6 +462,7 @@ def main(
     kubernetes_namespace: str = "default",
     instance_image_tag: str = "latest",
     report_dir: str = ".",
+    report_path: str = ""
 ):
     """
     Run evaluation harness for the given dataset and predictions.
@@ -524,7 +525,7 @@ def main(
                 max_workers=max_workers,
                 rewrite_reports=rewrite_reports
             )
-        return make_run_report(predictions, full_dataset, run_id, client=None)
+        return make_run_report(predictions, full_dataset, run_id, client=None, report_path=report_path)
 
     # run instances locally
     if platform.system() == "Linux":
@@ -554,7 +555,7 @@ def main(
 
     # clean images + make final report
     clean_images(client, existing_images, cache_level, clean)
-    return make_run_report(predictions, full_dataset, run_id, client)
+    return make_run_report(predictions, full_dataset, run_id, client, report_path=report_path)
 
 
 if __name__ == "__main__":
@@ -640,6 +641,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--report_dir", type=str, default=".", help="Directory to write reports to"
+    )
+    parser.add_argument(
+        "--report_path", type=str, default="", help="Precise path to write the report to"
     )
 
     # Modal execution args

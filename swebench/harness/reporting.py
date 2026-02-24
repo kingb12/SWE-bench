@@ -19,6 +19,7 @@ def make_run_report(
     full_dataset: list,
     run_id: str,
     client: Optional[docker.DockerClient] = None,
+    report_path: str = ""
 ) -> Path:
     """
     Make a final evaluation and run report of the instances that have been run.
@@ -132,7 +133,7 @@ def make_run_report(
         list(predictions.values())[0][KEY_MODEL].replace("/", "__")
         + f".{run_id}"
         + ".json"
-    )
+    ) if not report_path else Path(report_path)
     with open(report_file, "w") as f:
         print(json.dumps(report, indent=4), file=f)
     print(f"Report written to {report_file}")

@@ -36,7 +36,7 @@ echo "Derived run_id: $RUN_ID"
     --dataset_name "princeton-nlp/SWE-bench_Verified" \
     --split "test" \
     --predictions_path "$PRED_PATH" \
-    --max_workers 32 \
+    --max_workers 8 \
     --run_id "$RUN_ID" \
     --kubernetes true \
     --namespace swebench \

@@ -40,7 +40,8 @@ AVOID_NODES: list[str] = [
     "rci-tide-cpu-02.sdsu.edu",
     "gp-engine.hpc.okstate.edu",
     "k8s-gpu-01.calit2.optiputer.net",
-    "dtn-gpu2.kreonet.net"
+    "dtn-gpu2.kreonet.net",
+    "ry-gpu-10.sdsc.optiputer.net"
     ]
 AVOID_NODES += [f"k8s-haosu-{i:02d}.sdsc.optiputer.net" for i in range(1, 40)]
 
@@ -71,7 +72,7 @@ def create_pod_spec(
     instance_id: str,
     namespace: str,
     run_id: str,
-    naming_prefix: str = "bking2"
+    naming_prefix: str = "bking22"
 ) -> client.V1Pod:
     """
     Create a Kubernetes pod specification for running a SWE-bench instance.
